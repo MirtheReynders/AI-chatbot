@@ -1,0 +1,9 @@
+chroma_db/
+__pycache__/
+mijn_venv/
+venv/
+*.log
+*.tmp
+.vscode/
+*.swp
+.DS_Store

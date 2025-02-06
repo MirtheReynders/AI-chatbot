@@ -1,10 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
-import textwrap
 
+##TODO HANDMATIG SORTEN
 def scrape_fandom_character(anime, character):
-    #Scrape fandom wiki.. need to know a fix for lesser known anime
-    url = f"https://{anime}.fandom.com/wiki/{character.replace(' ', '_')}"
+    """Scrapet ruwe tekst van een Fandom wiki-pagina."""
+    url = f"https://{anime}.fandom.com/wiki/{character.replace(' ', '_').title()}"
     headers = {"User-Agent": "Mozilla/5.0"}
     
     response = requests.get(url, headers=headers)
@@ -12,22 +12,19 @@ def scrape_fandom_character(anime, character):
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # Probeer de naam van het karakter te vinden
         title = soup.find("h1").text.strip() if soup.find("h1") else character
 
-        # Pak de eerste paragrafen met de beschrijving
-        paragraphs = soup.find_all("p")
-        character_description = "\n".join([p.text.strip() for p in paragraphs if len(p.text.strip()) > 100])
-        
-        # Splits de tekst in kleinere stukken (voor ChromaDB) -> ngo uitleg vragen
-        chunks = textwrap.wrap(character_description, 512)
+        # Pak alle paragrafen samen
+        paragraphs = [p.text.strip() for p in soup.find_all("p") if len(p.text.strip()) > 100]
+        raw_text = "\n\n".join(paragraphs)  # Maak een enkele string van de tekst
 
-        return {"title": title, "chunks": chunks}
+        return {"title": title, "raw_text": raw_text}
+    
     else:
         return {"error": "Kan de pagina niet scrapen."}
 
 # testing! (works) 
-character_info = scrape_fandom_character("bts", "v")
+character_info = scrape_fandom_character("bungostraydogs", "osamu dazai")
 print(character_info)
 
 print()
